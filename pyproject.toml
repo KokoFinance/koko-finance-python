@@ -1,0 +1,26 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.backends._legacy:_Backend"
+
+[project]
+name = "koko-finance"
+version = "0.1.0"
+description = "Python SDK for the Koko Finance credit card intelligence API"
+readme = "README.md"
+license = {text = "MIT"}
+requires-python = ">=3.8"
+dependencies = ["requests>=2.28.0"]
+authors = [{name = "Koko Finance"}]
+keywords = ["credit cards", "finance", "API", "fintech"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Office/Business :: Financial",
+]
+
+[project.urls]
+Homepage = "https://kokofinance.net"
+Documentation = "https://kokofinance.net/developers"
+Repository = "https://github.com/madanc/koko-finance-python"
