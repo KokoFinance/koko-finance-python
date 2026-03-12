@@ -158,6 +158,7 @@ class KokoClient:
         primary_goal: Optional[str] = None,
         credit_tier: Optional[str] = None,
         issuer_preferences: Optional[List[dict]] = None,
+        verbose: bool = False,
     ) -> dict:
         """Analyze a credit card portfolio for value and optimization.
 
@@ -167,21 +168,26 @@ class KokoClient:
             primary_goal: One of "travel", "cashback", "build_credit", "business", "balance_transfer"
             credit_tier: One of "poor", "fair", "good", "excellent"
             issuer_preferences: List of dicts, e.g. [{"issuer": "Chase", "weight": 1.5}]
+            verbose: If True, use the verbose endpoint with AI narrative (3-5s).
+                     Default False uses the fast deterministic endpoint (<100ms).
 
         Returns:
-            dict with card_calculations, portfolio_summary, recommendations, and analysis
+            dict with card_details, portfolio_summary, and assumptions (fast)
+            or card_details, portfolio_summary, and AI-generated analysis (verbose)
         """
         payload = {"cards": cards}
         params = self._build_params(spending, primary_goal, credit_tier, issuer_preferences)
         if params:
             payload["params"] = params
-        return self._request("POST", "/portfolio/analyze", json=payload)
+        path = "/portfolio/analyze/verbose" if verbose else "/portfolio/analyze"
+        return self._request("POST", path, json=payload)
 
     def compare_cards(
         self,
         cards: List[dict],
         spending: Optional[Dict[str, float]] = None,
         primary_goal: Optional[str] = None,
+        verbose: bool = False,
     ) -> dict:
         """Compare 2-3 credit cards side-by-side.
 
@@ -190,9 +196,12 @@ class KokoClient:
                    Note: The API expects card_names as a list of strings.
             spending: Monthly spending by category
             primary_goal: Optimization goal
+            verbose: If True, use the verbose endpoint with AI winner/pros/cons (3-5s).
+                     Default False uses the fast deterministic endpoint (<100ms).
 
         Returns:
-            dict with comparison_table, winner, and analysis
+            dict with comparison_table and assumptions (fast)
+            or comparison_table, winner, and AI analysis (verbose)
         """
         # Extract card names for the API (V1CompareRequest uses card_names: List[str])
         card_names = [c["card_name"] if isinstance(c, dict) else c for c in cards]
@@ -200,7 +209,8 @@ class KokoClient:
         params = self._build_params(spending, primary_goal)
         if params:
             payload["params"] = params
-        return self._request("POST", "/cards/compare", json=payload)
+        path = "/cards/compare/verbose" if verbose else "/cards/compare"
+        return self._request("POST", path, json=payload)
 
     def recommend_card(
         self,
@@ -209,6 +219,7 @@ class KokoClient:
         primary_goal: Optional[str] = None,
         credit_tier: Optional[str] = None,
         portfolio_card_names: Optional[List[str]] = None,
+        verbose: bool = False,
     ) -> dict:
         """Get card recommendations for a spending category.
 
@@ -218,9 +229,12 @@ class KokoClient:
             primary_goal: Optimization goal
             credit_tier: Credit score tier for filtering
             portfolio_card_names: If provided, recommend from portfolio instead of market
+            verbose: If True, use the verbose endpoint with AI narrative (2-4s, portfolio mode only).
+                     Default False uses the fast deterministic endpoint (<100ms).
 
         Returns:
-            dict with recommended_card, alternatives, and analysis
+            dict with recommended_card, alternatives, and assumptions (fast)
+            or recommended_card, headline, explanation, and pro_tip (verbose)
         """
         payload = {"category": category}
         if portfolio_card_names:
@@ -228,7 +242,8 @@ class KokoClient:
         params = self._build_params(spending, primary_goal, credit_tier)
         if params:
             payload["params"] = params
-        return self._request("POST", "/cards/recommend", json=payload)
+        path = "/cards/recommend/verbose" if verbose else "/cards/recommend"
+        return self._request("POST", path, json=payload)
 
     def check_renewal(
         self,

@@ -40,11 +40,12 @@ print(analysis)
 | `base_url` | str  | `https://kokofinance.net` | API base URL |
 | `timeout`  | int  | `30` | Request timeout in seconds |
 
-### `analyze_portfolio(cards, spending, primary_goal, credit_tier, issuer_preferences)`
+### `analyze_portfolio(cards, spending, primary_goal, credit_tier, issuer_preferences, verbose)`
 
-Analyze 1-10 credit cards for total value, coverage gaps, and optimization strategies.
+Analyze 1-10 credit cards for total value, per-card verdicts (KEEP/OPTIMIZE/CANCEL), and break-even analysis.
 
 ```python
+# Fast (default, <100ms) — deterministic calculations
 analysis = client.analyze_portfolio(
     cards=[
         {"card_name": "Chase Sapphire Preferred", "annual_fee": 95},
@@ -53,13 +54,21 @@ analysis = client.analyze_portfolio(
     spending={"dining": 500, "travel": 300, "groceries": 400},
     primary_goal="travel",
 )
+
+# Verbose (3-5s) — adds AI-generated narrative
+analysis = client.analyze_portfolio(
+    cards=[...],
+    spending={"dining": 500, "travel": 300},
+    verbose=True,
+)
 ```
 
-### `compare_cards(cards, spending, primary_goal)`
+### `compare_cards(cards, spending, primary_goal, verbose)`
 
-Compare 2-3 credit cards side-by-side with fees, rewards, and a winner recommendation.
+Compare 2-3 credit cards side-by-side with fees, rewards, net value, and break-even.
 
 ```python
+# Fast (default, <100ms) — structured data, no AI winner
 comparison = client.compare_cards(
     cards=[
         {"card_name": "Chase Sapphire Preferred", "annual_fee": 95},
@@ -68,24 +77,34 @@ comparison = client.compare_cards(
     spending={"dining": 400, "travel": 500},
     primary_goal="travel",
 )
+
+# Verbose (3-5s) — adds AI-generated winner and pros/cons
+comparison = client.compare_cards(cards=[...], verbose=True)
 ```
 
-### `recommend_card(category, spending, primary_goal, credit_tier, portfolio_card_names)`
+### `recommend_card(category, spending, primary_goal, credit_tier, portfolio_card_names, verbose)`
 
 Get the best card recommendations for a spending category.
 
 ```python
-# From the full market
+# From the full market (always fast)
 recs = client.recommend_card(
     category="dining",
     spending={"dining": 600},
     credit_tier="excellent",
 )
 
-# From your existing portfolio
+# From your existing portfolio (fast, <100ms)
 recs = client.recommend_card(
     category="dining",
     portfolio_card_names=["Chase Sapphire Preferred", "Citi Double Cash"],
+)
+
+# From portfolio with AI narrative (verbose, 2-4s)
+recs = client.recommend_card(
+    category="dining",
+    portfolio_card_names=["Chase Sapphire Preferred", "Citi Double Cash"],
+    verbose=True,
 )
 ```
 
