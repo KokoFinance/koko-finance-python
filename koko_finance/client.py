@@ -187,6 +187,7 @@ class KokoClient:
         cards: List[dict],
         spending: Optional[Dict[str, float]] = None,
         primary_goal: Optional[str] = None,
+        issuer_preferences: Optional[List[dict]] = None,
         verbose: bool = False,
     ) -> dict:
         """Compare 2-3 credit cards side-by-side.
@@ -196,6 +197,7 @@ class KokoClient:
                    Note: The API expects card_names as a list of strings.
             spending: Monthly spending by category
             primary_goal: Optimization goal
+            issuer_preferences: List of dicts, e.g. [{"issuer": "Chase", "weight": 1.5}]
             verbose: If True, use the verbose endpoint with AI winner/pros/cons (3-5s).
                      Default False uses the fast deterministic endpoint (<100ms).
 
@@ -206,7 +208,7 @@ class KokoClient:
         # Extract card names for the API (V1CompareRequest uses card_names: List[str])
         card_names = [c["card_name"] if isinstance(c, dict) else c for c in cards]
         payload = {"card_names": card_names}
-        params = self._build_params(spending, primary_goal)
+        params = self._build_params(spending, primary_goal, issuer_preferences=issuer_preferences)
         if params:
             payload["params"] = params
         path = "/cards/compare/verbose" if verbose else "/cards/compare"
@@ -219,6 +221,7 @@ class KokoClient:
         primary_goal: Optional[str] = None,
         credit_tier: Optional[str] = None,
         portfolio_card_names: Optional[List[str]] = None,
+        issuer_preferences: Optional[List[dict]] = None,
         verbose: bool = False,
     ) -> dict:
         """Get card recommendations for a spending category.
@@ -229,6 +232,7 @@ class KokoClient:
             primary_goal: Optimization goal
             credit_tier: Credit score tier for filtering
             portfolio_card_names: If provided, recommend from portfolio instead of market
+            issuer_preferences: List of dicts, e.g. [{"issuer": "Chase", "weight": 1.5}]
             verbose: If True, use the verbose endpoint with AI narrative (2-4s, portfolio mode only).
                      Default False uses the fast deterministic endpoint (<100ms).
 
@@ -239,7 +243,7 @@ class KokoClient:
         payload = {"category": category}
         if portfolio_card_names:
             payload["portfolio_card_names"] = portfolio_card_names
-        params = self._build_params(spending, primary_goal, credit_tier)
+        params = self._build_params(spending, primary_goal, credit_tier, issuer_preferences)
         if params:
             payload["params"] = params
         path = "/cards/recommend/verbose" if verbose else "/cards/recommend"
@@ -250,6 +254,7 @@ class KokoClient:
         card: dict,
         spending: Optional[Dict[str, float]] = None,
         primary_goal: Optional[str] = None,
+        issuer_preferences: Optional[List[dict]] = None,
     ) -> dict:
         """Check if a card is worth renewing at annual fee time.
 
@@ -257,6 +262,7 @@ class KokoClient:
             card: Card dict, e.g. {"card_name": "Chase Sapphire Preferred", "annual_fee": 95}
             spending: Monthly spending by category
             primary_goal: Optimization goal
+            issuer_preferences: List of dicts, e.g. [{"issuer": "Chase", "weight": 1.5}]
 
         Returns:
             dict with verdict (RENEW/DOWNGRADE/CANCEL_AND_REPLACE), value analysis,
@@ -265,7 +271,7 @@ class KokoClient:
         payload = {"card_name": card["card_name"]}
         if "card_id" in card:
             payload["card_id"] = card["card_id"]
-        params = self._build_params(spending, primary_goal)
+        params = self._build_params(spending, primary_goal, issuer_preferences=issuer_preferences)
         if params:
             payload["params"] = params
         return self._request("POST", "/card/renewal-check", json=payload)

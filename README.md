@@ -63,7 +63,7 @@ analysis = client.analyze_portfolio(
 )
 ```
 
-### `compare_cards(cards, spending, primary_goal, verbose)`
+### `compare_cards(cards, spending, primary_goal, issuer_preferences, verbose)`
 
 Compare 2-3 credit cards side-by-side with fees, rewards, net value, and break-even.
 
@@ -82,7 +82,7 @@ comparison = client.compare_cards(
 comparison = client.compare_cards(cards=[...], verbose=True)
 ```
 
-### `recommend_card(category, spending, primary_goal, credit_tier, portfolio_card_names, verbose)`
+### `recommend_card(category, spending, primary_goal, credit_tier, portfolio_card_names, issuer_preferences, verbose)`
 
 Get the best card recommendations for a spending category.
 
@@ -108,7 +108,7 @@ recs = client.recommend_card(
 )
 ```
 
-### `check_renewal(card, spending, primary_goal)`
+### `check_renewal(card, spending, primary_goal, issuer_preferences)`
 
 Check if a card is worth keeping at annual fee renewal time.
 
@@ -171,7 +171,7 @@ The `spending` parameter accepts monthly dollar amounts for these categories:
 
 - [Developer Docs](https://kokofinance.net/developers)
 - [Interactive API Docs (Swagger)](https://kokofinance.net/api/v1/docs)
-- [GitHub](https://github.com/madanc/koko-finance-python)
+- [GitHub](https://github.com/KokoFinance/koko-finance-python)
 
 ## License
 
