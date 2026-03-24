@@ -255,6 +255,7 @@ class KokoClient:
         spending: Optional[Dict[str, float]] = None,
         primary_goal: Optional[str] = None,
         issuer_preferences: Optional[List[dict]] = None,
+        benefit_selections: Optional[List[str]] = None,
     ) -> dict:
         """Check if a card is worth renewing at annual fee time.
 
@@ -263,6 +264,8 @@ class KokoClient:
             spending: Monthly spending by category
             primary_goal: Optimization goal
             issuer_preferences: List of dicts, e.g. [{"issuer": "Chase", "weight": 1.5}]
+            benefit_selections: Benefit keys the user actually uses, e.g. ["uber", "airline_fee"].
+                Selected benefits count at 100%; unselected at 0%.
 
         Returns:
             dict with verdict (RENEW/DOWNGRADE/CANCEL_AND_REPLACE), value analysis,
@@ -271,6 +274,8 @@ class KokoClient:
         payload = {"card_name": card["card_name"]}
         if "card_id" in card:
             payload["card_id"] = card["card_id"]
+        if benefit_selections is not None:
+            payload["benefit_selections"] = benefit_selections
         params = self._build_params(spending, primary_goal, issuer_preferences=issuer_preferences)
         if params:
             payload["params"] = params

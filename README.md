@@ -108,7 +108,7 @@ recs = client.recommend_card(
 )
 ```
 
-### `check_renewal(card, spending, primary_goal, issuer_preferences)`
+### `check_renewal(card, spending, primary_goal, issuer_preferences, benefit_selections)`
 
 Check if a card is worth keeping at annual fee renewal time.
 
@@ -118,6 +118,13 @@ renewal = client.check_renewal(
     spending={"dining": 400, "travel": 300},
 )
 # renewal["verdict"] is "RENEW", "DOWNGRADE", or "CANCEL_AND_REPLACE"
+
+# With benefit selections (only selected benefits count at 100%)
+renewal = client.check_renewal(
+    card={"card_name": "Amex Platinum"},
+    spending={"dining": 400, "travel": 300, "groceries": 500},
+    benefit_selections=["uber", "airline_fee", "digital_entertainment"],
+)
 ```
 
 ### `health()`
