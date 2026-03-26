@@ -138,6 +138,7 @@ class KokoClient:
         primary_goal: Optional[str] = None,
         credit_tier: Optional[str] = None,
         issuer_preferences: Optional[List[dict]] = None,
+        benefit_selections: Optional[List[str]] = None,
     ) -> Optional[dict]:
         """Build ClientParameters dict from flat arguments."""
         params = {}
@@ -149,6 +150,8 @@ class KokoClient:
             params["credit_tier"] = credit_tier
         if issuer_preferences:
             params["issuer_preferences"] = issuer_preferences
+        if benefit_selections:
+            params["benefit_selections"] = benefit_selections
         return params if params else None
 
     def analyze_portfolio(
@@ -158,6 +161,7 @@ class KokoClient:
         primary_goal: Optional[str] = None,
         credit_tier: Optional[str] = None,
         issuer_preferences: Optional[List[dict]] = None,
+        benefit_selections: Optional[List[str]] = None,
         verbose: bool = False,
     ) -> dict:
         """Analyze a credit card portfolio for value and optimization.
@@ -168,6 +172,9 @@ class KokoClient:
             primary_goal: One of "travel", "cashback", "build_credit", "business", "balance_transfer"
             credit_tier: One of "poor", "fair", "good", "excellent"
             issuer_preferences: List of dicts, e.g. [{"issuer": "Chase", "weight": 1.5}]
+            benefit_selections: Benefit keys the user actually uses, e.g. ["uber", "airline_fee"].
+                Selected benefits count at 100%; unselected at 0%.
+                Use get_benefit_categories() to discover valid keys.
             verbose: If True, use the verbose endpoint with AI narrative (3-5s).
                      Default False uses the fast deterministic endpoint (<100ms).
 
@@ -176,7 +183,7 @@ class KokoClient:
             or card_details, portfolio_summary, and AI-generated analysis (verbose)
         """
         payload = {"cards": cards}
-        params = self._build_params(spending, primary_goal, credit_tier, issuer_preferences)
+        params = self._build_params(spending, primary_goal, credit_tier, issuer_preferences, benefit_selections)
         if params:
             payload["params"] = params
         path = "/portfolio/analyze/verbose" if verbose else "/portfolio/analyze"
@@ -291,3 +298,13 @@ class KokoClient:
     def health(self) -> dict:
         """Check API health status. No authentication required."""
         return self._request("GET", "/health")
+
+    def get_benefit_categories(self) -> dict:
+        """Get all valid benefit keys grouped by category. No authentication required.
+
+        Returns:
+            dict with 'categories' (list of {category, label, keys}),
+            'all_keys' (sorted list of every valid key),
+            and 'usage' documentation.
+        """
+        return self._request("GET", "/benefit-categories")

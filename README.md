@@ -40,7 +40,7 @@ print(analysis)
 | `base_url` | str  | `https://kokofinance.net` | API base URL |
 | `timeout`  | int  | `30` | Request timeout in seconds |
 
-### `analyze_portfolio(cards, spending, primary_goal, credit_tier, issuer_preferences, verbose)`
+### `analyze_portfolio(cards, spending, primary_goal, credit_tier, issuer_preferences, benefit_selections, verbose)`
 
 Analyze 1-10 credit cards for total value, per-card verdicts (KEEP/OPTIMIZE/CANCEL), and break-even analysis.
 
@@ -53,6 +53,15 @@ analysis = client.analyze_portfolio(
     ],
     spending={"dining": 500, "travel": 300, "groceries": 400},
     primary_goal="travel",
+)
+
+# With benefit selections (only selected benefits count at 100%)
+analysis = client.analyze_portfolio(
+    cards=[
+        {"card_name": "American Express Platinum Card", "annual_fee": 695},
+    ],
+    spending={"dining": 500, "travel": 300},
+    benefit_selections=["uber", "airline_fee", "digital_entertainment", "saks"],
 )
 
 # Verbose (3-5s) — adds AI-generated narrative
@@ -124,6 +133,21 @@ renewal = client.check_renewal(
     card={"card_name": "Amex Platinum"},
     spending={"dining": 400, "travel": 300, "groceries": 500},
     benefit_selections=["uber", "airline_fee", "digital_entertainment"],
+)
+```
+
+### `get_benefit_categories()`
+
+Get all valid benefit keys grouped by category (no authentication required). Use the returned keys with `benefit_selections` in `analyze_portfolio()` and `check_renewal()`.
+
+```python
+categories = client.get_benefit_categories()
+print(categories["all_keys"])  # ['admirals_club', 'airline_fee', 'dining', ...]
+
+# Use in portfolio analysis
+analysis = client.analyze_portfolio(
+    cards=[...],
+    benefit_selections=["uber", "dining", "admirals_club"],
 )
 ```
 
