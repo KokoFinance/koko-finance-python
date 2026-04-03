@@ -42,7 +42,7 @@ class KokoClient:
             "Content-Type": "application/json",
         })
 
-    def _request(self, method: str, path: str, json: dict = None) -> dict:
+    def _request(self, method: str, path: str, json: dict = None, params: dict = None) -> dict:
         """Make an API request and return the unwrapped data.
 
         Sends the HTTP request, checks for errors, unwraps the APIResponse
@@ -52,7 +52,7 @@ class KokoClient:
 
         try:
             resp = self._session.request(
-                method, url, json=json, timeout=self._timeout
+                method, url, json=json, params=params, timeout=self._timeout
             )
         except requests.ConnectionError as e:
             raise KokoError(f"Connection error: {e}")
@@ -308,3 +308,59 @@ class KokoClient:
             and 'usage' documentation.
         """
         return self._request("GET", "/benefit-categories")
+
+    def which_card_at_merchant(
+        self,
+        merchant: str,
+        amount: float = 100.0,
+        portfolio: Optional[List[str]] = None,
+    ) -> dict:
+        """Find the best card from your portfolio for a purchase at a specific merchant.
+
+        Auto-detects the spending category (e.g. Starbucks -> dining) and ranks
+        your cards by reward value.
+
+        Args:
+            merchant: Merchant name (e.g. "Starbucks", "Saks Fifth Avenue")
+            amount: Purchase amount in dollars (default: 100)
+            portfolio: List of card names in your portfolio
+
+        Returns:
+            dict with recommended_card, category_detected, category_method,
+            reason, and earnings_comparison
+        """
+        payload = {"merchant": merchant, "amount": amount, "portfolio": portfolio or []}
+        return self._request("POST", "/which-card-at-merchant", json=payload)
+
+    def merchant_benefits(
+        self,
+        merchant: str,
+        portfolio: Optional[List[str]] = None,
+    ) -> dict:
+        """Check if any cards in your portfolio have credits at a specific merchant.
+
+        Returns matching credits with value, frequency, and schedule,
+        plus an earning recommendation (which card earns the most here).
+
+        Args:
+            merchant: Merchant name (e.g. "Saks Fifth Avenue", "Uber", "Disney+")
+            portfolio: List of card names in your portfolio
+
+        Returns:
+            dict with matching_benefits (list of credit matches) and
+            earning_recommendation
+        """
+        payload = {"merchant": merchant, "portfolio": portfolio or []}
+        return self._request("POST", "/merchant-benefits", json=payload)
+
+    def card_benefits(self, card: str) -> dict:
+        """Get all credits, benefits, and rewards multipliers for a specific card.
+
+        Args:
+            card: Card name (e.g. "Amex Platinum", "Chase Sapphire Reserve")
+
+        Returns:
+            dict with card, issuer, annual_fee, credits (list),
+            total_credit_value, rewards_multipliers, points_program, portal_cpp
+        """
+        return self._request("GET", "/card-benefits", params={"card": card})

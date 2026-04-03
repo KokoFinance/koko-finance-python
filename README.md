@@ -2,7 +2,7 @@
 
 Python SDK for the [Koko Finance](https://kokofinance.net) credit card intelligence API.
 
-Analyze credit card portfolios, compare cards side-by-side, get spending-based recommendations, and check whether a card is worth renewing — all with a few lines of Python.
+Analyze credit card portfolios, compare cards side-by-side, get spending-based recommendations, check whether a card is worth renewing, and get merchant-level advice — all with a few lines of Python.
 
 ## Installation
 
@@ -157,6 +157,45 @@ Check API health status (no authentication required).
 
 ```python
 status = client.health()
+```
+
+### `which_card_at_merchant(merchant, amount, portfolio)`
+
+Find the best card from your portfolio for a purchase at a specific merchant. Auto-detects the spending category (e.g. Starbucks -> dining) and ranks your cards by reward value.
+
+```python
+result = client.which_card_at_merchant(
+    merchant="Starbucks",
+    amount=35,
+    portfolio=["Chase Sapphire Reserve", "Amex Gold", "Citi Double Cash"],
+)
+print(result["recommended_card"])  # "American Express Gold Card"
+print(result["category_detected"])  # "dining"
+print(result["reason"])  # "Starbucks codes as dining — Amex Gold 4x vs ..."
+```
+
+### `merchant_benefits(merchant, portfolio)`
+
+Check if any cards in your portfolio have credits at a specific merchant. Returns matching credits with value, frequency, and schedule, plus an earning recommendation.
+
+```python
+result = client.merchant_benefits(
+    merchant="Saks Fifth Avenue",
+    portfolio=["Amex Platinum", "Chase Sapphire Reserve"],
+)
+for b in result["matching_benefits"]:
+    print(f"{b['card']}: {b['name']} - ${b['value']} ({b['frequency']})")
+```
+
+### `card_benefits(card)`
+
+Get all credits, benefits, and rewards multipliers for a specific card.
+
+```python
+result = client.card_benefits(card="Amex Platinum")
+print(f"Total credit value: ${result['total_credit_value']}")
+for c in result["credits"]:
+    print(f"  {c['name']}: ${c['value']}")
 ```
 
 ## Error Handling
